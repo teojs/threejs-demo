@@ -5,14 +5,16 @@
 <script>
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 // import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader'
 // import { DragControls } from 'three/examples/jsm/controls/DragControls.js'
 
-let camera, scene, renderer, orbitControls, dragControls
+let camera, scene, renderer, orbitControls, dragControls, pointSprite
+const mouse = new THREE.Vector2(1, 1)
+const skyScene = new THREE.Object3D()
+const startPoint = []
 const raycaster = new THREE.Raycaster()
-const pointer = new THREE.Vector2()
-
 export default {
   routeInfo: {
     meta: {
@@ -51,7 +53,7 @@ export default {
       this.container.appendChild(renderer.domElement)
 
       camera = new THREE.PerspectiveCamera(
-        45,
+        70,
         window.innerWidth / window.innerHeight,
         0.1,
         20000
@@ -75,7 +77,10 @@ export default {
         ])
 
       // 直接给场景添加皮肤
-      scene.background = textureCube
+      // scene.background = textureCube
+
+      scene.add(skyScene)
+      this.addSky()
 
       this.textureLoader = new THREE.TextureLoader()
       // 加载立方体皮肤
@@ -100,6 +105,7 @@ export default {
       ]
       // 渲染贴图
       const skyMesh = new THREE.Mesh(geometry, skyTexture)
+      skyMesh.name = '全景盒子'
       scene.add(skyMesh)
 
       // 光照探针
@@ -138,6 +144,7 @@ export default {
       })
       const ball = new THREE.Mesh(ballSphereGeometry, bollMaterial)
       // ball.position.z = -2
+      ball.name = '反光球体'
       scene.add(ball)
 
       // 添加一个问号标点
@@ -146,9 +153,10 @@ export default {
         map: pointMap,
         color: 0xffffff,
       })
-      const pointSprite = new THREE.Sprite(pointMaterial)
+      pointSprite = new THREE.Sprite(pointMaterial)
       pointSprite.scale.set(1, 1, 1)
       pointSprite.position.set(0, 1.5, 0)
+      pointSprite.name = '问号标点1'
       scene.add(pointSprite)
 
       // 添加一个问号标点2
@@ -160,7 +168,7 @@ export default {
       )
       pointSprite1.scale.set(1, 1, 1)
       pointSprite1.position.set(10, 10, 10)
-      pointSprite1.material.rotation = Math.PI / 3
+      pointSprite1.name = '问号标点2'
       scene.add(pointSprite1)
 
       // 镜头控制器
@@ -182,8 +190,7 @@ export default {
       this.animate()
 
       window.addEventListener('resize', this.onWindowResize)
-
-      window.addEventListener('pointermove', this.onPointermove)
+      window.addEventListener('mousemove', this.raycasterEventEnd, false)
     },
     onWindowResize() {
       camera.aspect = window.innerWidth / window.innerHeight
@@ -193,19 +200,7 @@ export default {
 
       this.render()
     },
-    onPointermove(e) {
-      console.log(e)
-    },
     render() {
-      // 通过摄像机和鼠标位置更新射线
-      raycaster.setFromCamera(pointer, camera)
-      // 计算物体和射线的焦点
-      const intersects = raycaster.intersectObjects(scene.children)
-      console.log(intersects)
-
-      // for (let i = 0; i < intersects.length; i++) {
-      //   intersects[i].object.material.color.set(0xff0000)
-      // }
       renderer.render(scene, camera)
     },
     animate() {
@@ -213,6 +208,44 @@ export default {
       orbitControls.update()
 
       this.render()
+    },
+    addSky() {
+      const vertexShader =
+        'varying vec3 vWorldPosition;void main() {vec4 worldPosition = modelMatrix * vec4( position, 1.0 );vWorldPosition = worldPosition.xyz;gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );}'
+      const fragmentShader =
+        'uniform vec3 topColor;uniform vec3 bottomColor;uniform float offset;uniform float exponent;varying vec3 vWorldPosition;void main() {float h = normalize( vWorldPosition + offset ).y;gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h, 0.0 ), exponent ), 0.0 ) ), 1.0 );}'
+      const uniforms = {
+        topColor: { type: 'c', value: new THREE.Color(0x000000) },
+        bottomColor: { type: 'c', value: new THREE.Color(0x0077ff) },
+        offset: { type: 'f', value: 500 },
+        exponent: { type: 'f', value: 1 },
+      }
+
+      const skyGeo = new THREE.SphereBufferGeometry(4000, 32, 15)
+      const skyMat = new THREE.ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader,
+        side: THREE.BackSide,
+      })
+
+      skyScene.add(new THREE.Mesh(skyGeo, skyMat))
+    },
+    raycasterEventEnd(event) {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+      raycaster.setFromCamera(mouse, camera)
+      const intersects = raycaster.intersectObjects(scene.children)
+      if (intersects.length > 0) {
+        const object = intersects[0].object
+        if (object.name === '问号标点1') {
+          pointSprite.scale.set(2, 2, 2)
+        } else if (object.name === '问号标点2') {
+          console.log('问号标点2')
+        } else {
+          pointSprite.scale.set(1, 1, 1)
+        }
+      }
     },
   },
   computed: {},
@@ -223,5 +256,10 @@ export default {
 <style scoped lang='less'>
 #container {
   font-size: 0;
+}
+video {
+  position: absolute;
+  left: -2000px;
+  top: -2000px;
 }
 </style>
