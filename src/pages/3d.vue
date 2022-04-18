@@ -10,7 +10,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 // import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader'
 // import { DragControls } from 'three/examples/jsm/controls/DragControls.js'
 
-let camera, scene, renderer, orbitControls, dragControls, pointSprite
+let camera, scene, renderer, orbitControls, dragControls, pointSprite, bicycle
 const mouse = new THREE.Vector2(1, 1)
 const skyScene = new THREE.Object3D()
 const startPoint = []
@@ -48,6 +48,8 @@ export default {
       renderer.setPixelRatio(window.devicePixelRatio)
       renderer.setSize(window.innerWidth, window.innerHeight)
       renderer.shadowMap.enabled = true
+      // renderer.outputEncoding = THREE.sRGBEncoding
+      // renderer.toneMapping = THREE.ACESFilmicToneMapping
 
       this.container = document.getElementById('container')
       this.container.appendChild(renderer.domElement)
@@ -171,6 +173,16 @@ export default {
       pointSprite1.name = '问号标点2'
       scene.add(pointSprite1)
 
+      // 添加一辆自行车
+      const loader = new GLTFLoader()
+      loader.load('./image/Bicycle.glb', gltf => {
+        bicycle = gltf.scene.children[0]
+        bicycle.scale.set(1, 1, 1)
+        bicycle.position.set(0, -50, 0)
+        bicycle.name = '自行车'
+        scene.add(bicycle)
+      })
+
       // 镜头控制器
       orbitControls = new OrbitControls(camera, renderer.domElement)
       orbitControls.enableDamping = true
@@ -201,6 +213,7 @@ export default {
       this.render()
     },
     render() {
+      bicycle && (bicycle.rotation.y += 0.01)
       renderer.render(scene, camera)
     },
     animate() {
@@ -238,6 +251,7 @@ export default {
       const intersects = raycaster.intersectObjects(scene.children)
       if (intersects.length > 0) {
         const object = intersects[0].object
+        console.log(object.name)
         if (object.name === '问号标点1') {
           pointSprite.scale.set(2, 2, 2)
         } else if (object.name === '问号标点2') {
