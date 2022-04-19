@@ -90,7 +90,7 @@ export default {
       scene.add(lightProbe)
 
       // 平行光
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
       directionalLight.position.set(2, 5, 2)
       directionalLight.castShadow = true
       scene.add(directionalLight)
@@ -109,37 +109,39 @@ export default {
       // 镜像摄像头
       const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
         generateMipmaps: true,
-        minFilter: THREE.EquirectangularReflectionMapping,
+        minFilter: THREE.UVMapping,
       })
       mirrorCamera = new THREE.CubeCamera(0.1, 20000, cubeRenderTarget)
       mirrorCamera.position.set(0, 0, 0)
       scene.add(mirrorCamera)
 
-      // 平面
-      const planeGeo = new THREE.PlaneGeometry(20, 20)
-      const stageGeo = new THREE.CylinderGeometry(3.8, 4, 0.3, 64)
-      const stageMaterial = new THREE.MeshStandardMaterial({
+      // 展示台
+      const stageMaterial = new THREE.MeshLambertMaterial({
+        // color: 0x1684fc,
         color: 0xffffff,
-        // envMap: cubeRenderTarget.texture,
-        // roughness: 0.05,
-        // metalness: 1,
+        envMap: cubeRenderTarget.texture,
+        roughness: 0.5,
+        metalness: 0.5,
       })
-      const stage = new THREE.Mesh(stageGeo, stageMaterial)
-      stage.position.set(0, -0.1, 0)
-      stage.receiveShadow = true
-      scene.add(stage)
+      // const stageGeo = new THREE.CylinderGeometry(3.9, 4, 0.3, 64)
+      // const stage = new THREE.Mesh(stageGeo, stageMaterial)
+      // stage.position.set(0, -0.2, 0)
+      // stage.receiveShadow = true
+      // scene.add(stage)
 
-      // const plane = new THREE.Mesh(planeGeo, stageMaterial)
-      // plane.rotation.x = -Math.PI / 2
-      // plane.receiveShadow = true
-      // scene.add(plane)
+      // 平面
+      const planeGeo = new THREE.CircleGeometry(4, 64)
+      const plane = new THREE.Mesh(planeGeo, stageMaterial)
+      plane.rotation.x = -Math.PI / 2
+      plane.receiveShadow = true
+      scene.add(plane)
 
       // 添加一辆自行车
       const loader = new GLTFLoader()
       loader.load('./image/Bicycle.glb', gltf => {
         bicycle = gltf.scene.children[0]
         bicycle.scale.set(0.1, 0.1, 0.1)
-        bicycle.position.set(0, 0.1, 0)
+        bicycle.position.set(0, 0, 0)
         bicycle.name = '自行车'
         bicycle.traverse(child => {
           if (child.isMesh) {
@@ -149,6 +151,21 @@ export default {
         })
         bicycle.rotation.y = -Math.PI / 2
         scene.add(bicycle)
+      })
+
+      // 添加一棵树
+      loader.load('./image/EvergreenTree.glb', gltf => {
+        const tree = gltf.scene.children[0]
+        tree.scale.set(0.1, 0.1, 0.1)
+        tree.position.set(1, 0, 1)
+        tree.name = '树'
+        tree.traverse(child => {
+          if (child.isMesh) {
+            child.castShadow = true
+            child.receiveShadow = true
+          }
+        })
+        scene.add(tree)
       })
 
       // 镜头控制器
@@ -191,7 +208,9 @@ export default {
     },
     animate() {
       requestAnimationFrame(this.animate)
+
       orbitControls.update()
+
       mirrorCamera && mirrorCamera.update(renderer, scene)
 
       this.render()
