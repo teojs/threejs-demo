@@ -9,6 +9,7 @@ import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 // import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader'
 // import { DragControls } from 'three/examples/jsm/controls/DragControls.js'
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js'
 
 let camera,
   scene,
@@ -18,7 +19,8 @@ let camera,
   pointSprite,
   bicycle,
   meteorMaterial,
-  cubeCamera
+  cubeCamera,
+  mirrorCamera
 const mouse = new THREE.Vector2(1, 1)
 const skyScene = new THREE.Object3D()
 const startPoint = []
@@ -56,21 +58,22 @@ export default {
       renderer.setPixelRatio(window.devicePixelRatio)
       renderer.setSize(window.innerWidth, window.innerHeight)
       renderer.shadowMap.enabled = true
-      // renderer.outputEncoding = THREE.sRGBEncoding
-      // renderer.toneMapping = THREE.ACESFilmicToneMapping
+      renderer.outputEncoding = THREE.sRGBEncoding
+      renderer.toneMapping = THREE.ACESFilmicToneMapping
       renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
       this.container = document.getElementById('container')
       this.container.appendChild(renderer.domElement)
 
+      // 透视
       camera = new THREE.PerspectiveCamera(
-        70,
+        45,
         window.innerWidth / window.innerHeight,
         0.1,
         20000
       )
 
-      camera.position.set(0, 4, 6)
+      camera.position.set(0, 5, 10)
 
       // 创建场景
       scene = new THREE.Scene()
@@ -79,7 +82,7 @@ export default {
       // scene.background = textureCube
 
       scene.add(skyScene)
-      // this.addSky()
+      this.addSky()
       // this.addMeteor()
 
       // 光照探针
@@ -87,11 +90,11 @@ export default {
       scene.add(lightProbe)
 
       // 平行光
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 4)
-      directionalLight.position.set(5, 5, 5)
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
+      directionalLight.position.set(2, 5, 2)
       directionalLight.castShadow = true
       scene.add(directionalLight)
-      scene.add(new THREE.DirectionalLightHelper(directionalLight, 1))
+      // scene.add(new THREE.DirectionalLightHelper(directionalLight, 1))
 
       // // 点光
       // const pointLight = new THREE.PointLight(0xffffff, 1)
@@ -101,21 +104,35 @@ export default {
       // scene.add(new THREE.PointLightHelper(pointLight, 1))
 
       // 均匀光
-      scene.add(new THREE.AmbientLight(0xffffff, 2))
+      scene.add(new THREE.AmbientLight(0xffffff, 0.5))
+
+      // 镜像摄像头
+      const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
+        generateMipmaps: true,
+        minFilter: THREE.EquirectangularReflectionMapping,
+      })
+      mirrorCamera = new THREE.CubeCamera(0.1, 20000, cubeRenderTarget)
+      mirrorCamera.position.set(0, 0, 0)
+      scene.add(mirrorCamera)
 
       // 平面
       const planeGeo = new THREE.PlaneGeometry(20, 20)
-      const stageGeo = new THREE.CylinderGeometry(4, 4, 0.1, 32)
-      const stageMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff })
+      const stageGeo = new THREE.CylinderGeometry(3.8, 4, 0.3, 64)
+      const stageMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        // envMap: cubeRenderTarget.texture,
+        // roughness: 0.05,
+        // metalness: 1,
+      })
       const stage = new THREE.Mesh(stageGeo, stageMaterial)
-      stage.position.set(0, 0, 0)
+      stage.position.set(0, -0.1, 0)
       stage.receiveShadow = true
       scene.add(stage)
 
-      const plane = new THREE.Mesh(planeGeo, stageMaterial)
-      plane.rotation.x = -Math.PI / 2
-      plane.receiveShadow = true
-      scene.add(plane)
+      // const plane = new THREE.Mesh(planeGeo, stageMaterial)
+      // plane.rotation.x = -Math.PI / 2
+      // plane.receiveShadow = true
+      // scene.add(plane)
 
       // 添加一辆自行车
       const loader = new GLTFLoader()
@@ -124,25 +141,15 @@ export default {
         bicycle.scale.set(0.1, 0.1, 0.1)
         bicycle.position.set(0, 0.1, 0)
         bicycle.name = '自行车'
-        bicycle.castShadow = true
-        bicycle.receiveShadow = true
+        bicycle.traverse(child => {
+          if (child.isMesh) {
+            child.castShadow = true
+            child.receiveShadow = true
+          }
+        })
+        bicycle.rotation.y = -Math.PI / 2
         scene.add(bicycle)
       })
-
-      // 反光球体
-      const ballSphereGeometry = new THREE.SphereGeometry(1, 64, 32)
-      const bollMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        metalness: 0.9,
-        roughness: 0,
-        envMapIntensity: 1,
-      })
-      const ball = new THREE.Mesh(ballSphereGeometry, bollMaterial)
-      ball.position.set(2, 1, 2)
-      ball.scale.set(0.3, 0.3, 0.3)
-      ball.castShadow = true
-      ball.name = '反光球体'
-      scene.add(ball)
 
       // 镜头控制器
       orbitControls = new OrbitControls(camera, renderer.domElement)
@@ -150,21 +157,14 @@ export default {
       orbitControls.dampingFactor = 0.1
       orbitControls.rotateSpeed = 0.3
       orbitControls.zoomSpeed = 2
-      // orbitControls.minDistance = 1
-      // orbitControls.maxDistance = 30
       orbitControls.enablePan = true
       // orbitControls.autoRotate = true
       // orbitControls.autoRotateSpeed = 0.1
 
-      const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256)
-      cubeRenderTarget.texture.type = THREE.HalfFloatType
-
-      cubeCamera = new THREE.CubeCamera(1, 1000, cubeRenderTarget)
-
       this.animate()
 
       window.addEventListener('resize', this.onWindowResize)
-      window.addEventListener('mousemove', this.raycasterEventEnd, false)
+      // window.addEventListener('mousemove', this.raycasterEventEnd, false)
     },
     onWindowResize() {
       camera.aspect = window.innerWidth / window.innerHeight
@@ -192,6 +192,7 @@ export default {
     animate() {
       requestAnimationFrame(this.animate)
       orbitControls.update()
+      mirrorCamera && mirrorCamera.update(renderer, scene)
 
       this.render()
     },
