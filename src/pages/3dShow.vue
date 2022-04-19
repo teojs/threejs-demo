@@ -73,7 +73,7 @@ export default {
         20000
       )
 
-      camera.position.set(0, 5, 10)
+      camera.position.set(0, 8, 12)
 
       // 创建场景
       scene = new THREE.Scene()
@@ -130,7 +130,7 @@ export default {
       // scene.add(stage)
 
       // 平面
-      const planeGeo = new THREE.CircleGeometry(4, 64)
+      const planeGeo = new THREE.CircleGeometry(6, 64)
       const plane = new THREE.Mesh(planeGeo, stageMaterial)
       plane.rotation.x = -Math.PI / 2
       plane.receiveShadow = true
@@ -156,8 +156,8 @@ export default {
       // 添加一棵树
       loader.load('./image/EvergreenTree.glb', gltf => {
         const tree = gltf.scene.children[0]
-        tree.scale.set(0.1, 0.1, 0.1)
-        tree.position.set(1, 0, 1)
+        tree.scale.set(0.05, 0.05, 0.05)
+        tree.position.set(0, 0, -4)
         tree.name = '树'
         tree.traverse(child => {
           if (child.isMesh) {
