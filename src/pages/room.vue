@@ -103,7 +103,7 @@ export default {
       // scene.add(new THREE.PointLightHelper(pointLight, 1))
 
       // 均匀光
-      scene.add(new THREE.AmbientLight(0xffffff, 0.5))
+      scene.add(new THREE.AmbientLight(0xffffff, 2))
 
       // 镜像摄像头
       const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
