@@ -43,7 +43,7 @@ export default {
   beforeMount() {},
   mounted() {
     this.init()
-    this.render()
+    this.animate()
   },
   beforeUpdate() {},
   updated() {},
@@ -131,8 +131,6 @@ export default {
       orbitControls.rotateSpeed = -0.3
       orbitControls.zoomSpeed = 2
       orbitControls.enablePan = true
-
-      this.animate()
 
       window.addEventListener('resize', this.onWindowResize)
     },

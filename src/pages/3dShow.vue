@@ -43,7 +43,7 @@ export default {
   beforeMount() {},
   mounted() {
     this.init()
-    this.render()
+    this.animate()
   },
   beforeUpdate() {},
   updated() {},
@@ -177,8 +177,6 @@ export default {
       orbitControls.enablePan = true
       // orbitControls.autoRotate = true
       // orbitControls.autoRotateSpeed = 0.1
-
-      this.animate()
 
       window.addEventListener('resize', this.onWindowResize)
       // window.addEventListener('mousemove', this.raycasterEventEnd, false)
