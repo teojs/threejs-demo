@@ -104,7 +104,7 @@ export default {
       scene.add(new THREE.PointLightHelper(pointLight, 1))
 
       // 均匀光
-      scene.add(new THREE.AmbientLight(0xffffff, 0.6))
+      scene.add(new THREE.AmbientLight(0xffffff, 0.8))
 
       // mmd
       // const audioParams = { delayTime: (160 * 1) / 30 }
@@ -118,7 +118,7 @@ export default {
       // 加载角色
       loader.loadWithAnimation(
         './image/mmd/宵宫/宵宫.pmx',
-        ['./image/vmd/倾杯.vmd'],
+        ['./image/vmd/我的悲伤是水做的.vmd'],
         function(mmd) {
           const mesh = mmd.mesh
           // mesh.position.set(0, -10, 0)
@@ -227,12 +227,11 @@ export default {
   bottom: 100px;
   left: 50%;
   margin-left: -100px;
-  background: #fff;
+  background: rgba(0, 0, 0, 0.5);
   border-radius: 5px;
   text-align: center;
-  line-height: 50px;
   font-size: 20px;
-  color: #000;
+  color: #fff;
   cursor: pointer;
   border: 1px solid #ccc;
   padding: 10px 20px;
