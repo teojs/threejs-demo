@@ -17,7 +17,8 @@ let scene
 let renderer
 let orbitControls
 let helper
-let ready = false
+let playing = false
+let bgm
 const clock = new THREE.Clock()
 
 const skyScene = new THREE.Object3D()
@@ -57,7 +58,15 @@ export default {
   unmounted() {},
   methods: {
     play() {
-      ready = !ready
+      playing = !playing
+      helper.enable('animation', playing)
+      if (bgm) {
+        if (bgm.isPlaying) {
+          bgm.pause()
+        } else {
+          bgm.play()
+        }
+      }
     },
     init() {
       // 创建渲染器，添加抗锯齿
@@ -88,13 +97,7 @@ export default {
       // 直接给场景添加皮肤
       // scene.background = new THREE.Color(0xffffff)
 
-      const listener = new THREE.AudioListener()
-      camera.add(listener)
       scene.add(skyScene)
-
-      // // 光照探针
-      // const lightProbe = new THREE.LightProbe()
-      // scene.add(lightProbe)
 
       // 点光
       const pointLight = new THREE.PointLight(0xffffff, 1, 150)
@@ -106,18 +109,30 @@ export default {
       // 均匀光
       scene.add(new THREE.AmbientLight(0xffffff, 0.8))
 
+      // 加载音乐
+      const listener = new THREE.AudioListener()
+      camera.add(listener)
+      bgm = new THREE.Audio(listener)
+      new THREE.AudioLoader().load(
+        './image/audio/我的悲伤是是水做的.mp3',
+        function(buffer) {
+          bgm.setBuffer(buffer)
+          bgm.setLoop(true)
+        }
+      )
+
       // mmd
       // const audioParams = { delayTime: (160 * 1) / 30 }
-      const audioParams = { delayTime: 0 }
       const loader = new MMDLoader()
 
       helper = new MMDAnimationHelper({
         afterglow: 2.0,
       })
+      helper.enable('animation', false)
 
       // 加载角色
       loader.loadWithAnimation(
-        './image/mmd/宵宫/宵宫.pmx',
+        './image/mmd/心海/珊瑚宫心海.pmx',
         ['./image/vmd/我的悲伤是水做的.vmd'],
         function(mmd) {
           const mesh = mmd.mesh
@@ -132,26 +147,13 @@ export default {
           })
 
           // 加载运镜
-
           loader.loadAnimation(
-            ['./image/vmd/倾杯_相机.vmd'],
+            ['./image/vmd/我的悲伤是水做的_镜头_胶龙兽.vmd'],
             camera,
             function(cameraAnimation) {
-              // helper.add(camera, {
-              //   animation: cameraAnimation,
-              // })
-
-              new THREE.AudioLoader().load(
-                './image/audio/倾杯.wav',
-                function(buffer) {
-                  const audio = new THREE.Audio(listener).setBuffer(buffer)
-
-                  helper.add(audio, audioParams)
-                  scene.add(mesh)
-
-                  // ready = true
-                }
-              )
+              helper.add(camera, {
+                animation: cameraAnimation,
+              })
             }
           )
 
@@ -199,7 +201,7 @@ export default {
       this.render()
     },
     render() {
-      if (ready) {
+      if (playing) {
         helper.update(clock.getDelta())
       }
       renderer.render(scene, camera)
