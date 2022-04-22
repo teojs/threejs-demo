@@ -42,7 +42,7 @@ export default defineConfig({
     'process.env': {},
   },
   build: {
-    outDir: 'docs',
+    // outDir: 'docs',
     // rollupOptions: {
     //   // 生成代码分析
     //   // plugins: [visualizer()],

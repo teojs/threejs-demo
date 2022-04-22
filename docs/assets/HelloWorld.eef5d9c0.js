@@ -1,1 +1,0 @@
-import{_ as t}from"./index.68ac6365.js";import{k as a,X as o,ai as s,o as l}from"./vendor.56b12f08.js";const r={name:"HelloWorld",props:{msg:{type:String,default:""}}},_={class:"helloworld"};function n(c,d,e,i,p,m){return l(),a("div",_,[o("h1",null,s(e.msg),1),o("p",null,s(e.msg),1)])}var v=t(r,[["render",n],["__scopeId","data-v-328ec648"]]);export{v as default};
