@@ -4,7 +4,7 @@ import Home from '@/views/Home.vue'
 import NotFound from '@/views/404.vue'
 
 const router = createRouter({
-  history: createWebHistory('/threejs-demo'),
+  history: createWebHistory('/'),
   routes: [
     {
       name: 'Home',

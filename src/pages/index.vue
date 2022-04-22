@@ -1,241 +1,192 @@
 <template>
   <div id="container" />
-  <button
-    id="startButton"
-    @click="play">
-    播放/暂停
-  </button>
+  <div class="options">
+    <label for="">
+      <div>lookAt</div>
+      <input
+        v-model="lookAt.x"
+        min="-5000"
+        max="5000"
+        type="range">
+      <input
+        v-model="lookAt.y"
+        min="-5000"
+        max="5000"
+        type="range">
+      <input
+        v-model="lookAt.z"
+        min="-5000"
+        max="5000"
+        type="range">
+    </label>
+    <label for="">
+      <div>cameraPos</div>
+      <input
+        v-model="cameraPos.x"
+        min="-5000"
+        max="5000"
+        type="range">
+      <input
+        v-model="cameraPos.y"
+        min="-5000"
+        max="5000"
+        type="range">
+      <input
+        v-model="cameraPos.z"
+        min="-1000"
+        max="1000"
+        type="range">
+    </label>
+  </div>
 </template>
 
 <script>
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { MMDLoader } from 'three/examples/jsm/loaders/MMDLoader'
-import { MMDAnimationHelper } from 'three/examples/jsm/animation/MMDAnimationHelper.js'
-let camera
-let scene
-let renderer
-let orbitControls
-let helper
-let playing = false
-let bgm
-const clock = new THREE.Clock()
-
-const skyScene = new THREE.Object3D()
-
 export default {
+  name: 'Home',
   routeInfo: {
     meta: {
-      title: 'Pages3d',
+      title: '首页',
     },
-    icon: 'el-icon-menu',
-    hidden: true,
     sort: 1,
   },
-  components: {},
   data() {
     return {
-      isStarted: false,
+      mouseX: 0,
+      mouseY: 0,
+      mouseZ: 3,
+      windowHalfX: window.innerWidth / 2,
+      windowHalfY: window.innerHeight / 2,
+
+      lookAt: {
+        x: 0,
+        y: 0,
+        z: -600,
+      },
+      cameraPos: {
+        x: 0,
+        y: 0,
+        z: 0,
+      },
     }
   },
-  beforeCreate() {},
-  created() {},
-  beforeMount() {},
   mounted() {
     this.$nextTick(() => {
-      window.Ammo().then(AmmoLib => {
-        window.Ammo = AmmoLib
-        this.init()
-        this.animate()
-      })
+      this.init()
     })
   },
-  beforeUpdate() {},
-  updated() {},
-  activated() {},
-  deactivated() {},
-  beforeUnmount() {},
-  unmounted() {},
   methods: {
-    play() {
-      playing = !playing
-      helper.enable('animation', playing)
-      if (bgm) {
-        if (bgm.isPlaying) {
-          bgm.pause()
-        } else {
-          bgm.play()
-        }
-      }
-    },
     init() {
-      // 创建渲染器，添加抗锯齿
-      renderer = new THREE.WebGLRenderer({ antialias: true })
-      renderer.setPixelRatio(window.devicePixelRatio)
-      renderer.setSize(window.innerWidth, window.innerHeight)
-      renderer.shadowMap.enabled = true
-      // renderer.outputEncoding = THREE.sRGBEncoding
-      // renderer.toneMapping = THREE.ACESFilmicToneMapping
-      // renderer.shadowMap.type = THREE.PCFSoftShadowMap
-
       this.container = document.getElementById('container')
-      this.container.appendChild(renderer.domElement)
+      window.addEventListener('resize', this.onWindowResize, false)
+      document.addEventListener('mousemove', this.onMouseMove, false)
+      document.addEventListener('wheel', this.onMouseWheel, false)
 
-      // 透视
-      camera = new THREE.PerspectiveCamera(
-        45,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        20000
-      )
+      // 创建渲染器，添加抗锯齿
+      this.renderer = new THREE.WebGLRenderer({ antialias: true })
 
-      camera.position.set(0, 20, 60)
+      // 设置像素比
+      this.renderer.setPixelRatio(window.devicePixelRatio)
+      this.renderer.setSize(window.innerWidth, window.innerHeight)
+      this.renderer.shadowMap.enabled = true
+
+      this.container.appendChild(this.renderer.domElement)
 
       // 创建场景
-      scene = new THREE.Scene()
+      this.scene = new THREE.Scene()
 
-      // 直接给场景添加皮肤
-      // scene.background = new THREE.Color(0xffffff)
-
-      scene.add(skyScene)
-
-      // 点光
-      const pointLight = new THREE.PointLight(0xffffff, 1, 150)
-      pointLight.position.set(50, 100, -40)
-      pointLight.castShadow = true
-      scene.add(pointLight)
-      scene.add(new THREE.PointLightHelper(pointLight, 1))
-
-      // 均匀光
-      scene.add(new THREE.AmbientLight(0xffffff, 0.8))
-
-      // 加载音乐
-      const listener = new THREE.AudioListener()
-      camera.add(listener)
-      bgm = new THREE.Audio(listener)
-      new THREE.AudioLoader().load(
-        './image/audio/我的悲伤是是水做的.mp3',
-        function(buffer) {
-          bgm.setBuffer(buffer)
-          bgm.setLoop(true)
-        }
-      )
-
-      // mmd
-      // const audioParams = { delayTime: (160 * 1) / 30 }
-      const loader = new MMDLoader()
-
-      helper = new MMDAnimationHelper({
-        afterglow: 2.0,
+      // 全景场景
+      const geometry = new THREE.SphereGeometry(600, 60, 60)
+      // 按z轴翻转
+      geometry.scale(1, 1, -1)
+      // 添加贴图：全景图
+      const skyTexture = new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load('./image/skyTexture_2.jpg'),
       })
-      helper.enable('animation', false)
 
-      // 加载角色
-      loader.loadWithAnimation(
-        './image/mmd/心海/珊瑚宫心海.pmx',
-        ['./image/vmd/我的悲伤是水做的.vmd'],
-        function(mmd) {
-          const mesh = mmd.mesh
-          // mesh.position.set(0, -10, 0)
-          mesh.castShadow = true
-          mesh.receiveShadow = true
-          scene.add(mesh)
+      // 渲染贴图
+      this.mesh = new THREE.Mesh(geometry, skyTexture)
 
-          helper.add(mesh, {
-            animation: mmd.animation,
-            physics: true,
-          })
+      this.scene.add(this.mesh)
 
-          // 加载运镜
-          loader.loadAnimation(
-            ['./image/vmd/我的悲伤是水做的_镜头_胶龙兽.vmd'],
-            camera,
-            function(cameraAnimation) {
-              helper.add(camera, {
-                animation: cameraAnimation,
-              })
-            }
-          )
+      // 渲染一个盒子作参照物
+      const box = new THREE.BoxGeometry()
+      const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+      const cube = new THREE.Mesh(box, boxMaterial)
+      cube.position.z = -100
 
-          const ikHelper = helper.objects.get(mesh).ikSolver.createHelper()
-          ikHelper.visible = false
-          scene.add(ikHelper)
+      this.scene.add(cube)
 
-          const physicsHelper = helper.objects.get(mesh).physics.createHelper()
-          physicsHelper.visible = false
-          scene.add(physicsHelper)
-        }
+      // 摄像机
+      this.camera = new THREE.PerspectiveCamera(
+        60, // 视野大小
+        window.innerWidth / window.innerHeight, // 视野比例
+        1,
+        2000
       )
-
-      // 加载舞台
-
-      new MMDLoader().load(
-        './image/stage/简约时尚舞台/Stage.pmx',
-        function(mesh) {
-          // mesh.scale.set(0.1, 0.1, 0.1)
-          mesh.position.set(0, 0, 50)
-          mesh.castShadow = true
-          mesh.receiveShadow = true
-          scene.add(mesh)
-        }
+      // 设置摄像机位置
+      this.camera.position.set(
+        this.cameraPos.x,
+        this.cameraPos.y,
+        this.cameraPos.z
       )
+      // this.camera.target = new THREE.Vector3(0, 0, 0)
+      // this.camera.position.z = 0
+      // this.camera.focalLength = 3
 
-      // 镜头控制器
-      orbitControls = new OrbitControls(camera, renderer.domElement)
-      orbitControls.enableDamping = true
-      orbitControls.dampingFactor = 0.05
-      orbitControls.rotateSpeed = 0.3
-      orbitControls.zoomSpeed = 2
-      orbitControls.enablePan = true
-
-      // this.animate()
-
-      window.addEventListener('resize', this.onWindowResize)
-    },
-    onWindowResize() {
-      camera.aspect = window.innerWidth / window.innerHeight
-      camera.updateProjectionMatrix()
-
-      renderer.setSize(window.innerWidth, window.innerHeight)
-
-      this.render()
-    },
-    render() {
-      if (playing) {
-        helper.update(clock.getDelta())
+      const animate = () => {
+        requestAnimationFrame(animate)
+        this.render()
       }
-      renderer.render(scene, camera)
+      animate()
     },
-    animate() {
-      requestAnimationFrame(this.animate)
 
-      orbitControls.update()
+    render() {
+      // this.camera.position.x += (this.mouseX - this.camera.position.x) * 0.1
+      // this.camera.position.y += (-this.mouseY - this.camera.position.y) * 0.1
+      // this.camera.position.z += (this.mouseZ - this.camera.position.z) * 0.1
+      this.lookAt.x += (-this.mouseX - this.lookAt.x) * 0.1
+      this.lookAt.y += (this.mouseY - this.lookAt.y) * 0.1
+      // this.cameraPos.z += (this.mouseZ - this.cameraPos.z) * 0.1
+      // this.camera.lookAt(this.scene.position)
+      this.camera.lookAt(this.lookAt.x, this.lookAt.y, this.lookAt.z)
+      this.camera.position.set(
+        this.cameraPos.x,
+        this.cameraPos.y,
+        this.cameraPos.z
+      )
+      this.renderer.render(this.scene, this.camera)
+    },
 
-      this.render()
+    onMouseMove(event) {
+      this.mouseX = event.clientX - this.windowHalfX
+      this.mouseY = event.clientY - this.windowHalfY
+    },
+
+    onMouseWheel(event) {
+      this.camera.fov += event.deltaY * 0.05
+      this.camera.updateProjectionMatrix()
+    },
+
+    // 窗口改变重新渲染
+    onWindowResize() {
+      this.windowHalfX = window.innerWidth / 2
+      this.windowHalfY = window.innerHeight / 2
+      this.camera.aspect = window.innerWidth / window.innerHeight
+      this.camera.updateProjectionMatrix()
+      this.renderer.setSize(window.innerWidth, window.innerHeight)
     },
   },
-  computed: {},
-  watch: {},
 }
 </script>
-
-<style scoped lang='less'>
-#container {
-  font-size: 0;
-  position: relative;
-}
-#startButton {
+<style lang="less" scoped>
+.options {
   position: fixed;
-  bottom: 100px;
-  left: 50%;
-  margin-left: -100px;
+  top: 10px;
+  left: 10px;
+  padding: 10px;
   background: rgba(0, 0, 0, 0.5);
-  border-radius: 5px;
-  text-align: center;
-  font-size: 20px;
-  color: #fff;
-  cursor: pointer;
-  border: 1px solid #ccc;
-  padding: 10px 20px;
+  border-radius: 4px;
+  color: #ffffff;
 }
 </style>
