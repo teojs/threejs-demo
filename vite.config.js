@@ -13,7 +13,7 @@ const proxyTarget = process.env.npm_config_api || 'test'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/threejs-demo',
+  base: '/threejs-demo/',
   plugins: [
     vue(),
     eslint({
