@@ -41,10 +41,11 @@ export default defineConfig({
   define: {
     'process.env': {},
   },
-  // build: {
-  //   rollupOptions: {
-  //     // 生成代码分析
-  //     // plugins: [visualizer()],
-  //   },
-  // },
+  build: {
+    outDir: 'docs',
+    // rollupOptions: {
+    //   // 生成代码分析
+    //   // plugins: [visualizer()],
+    // },
+  },
 })
