@@ -2,9 +2,10 @@
   <div id="container" />
   <button
     id="startButton"
-    @click="play">
-    播放/暂停
-  </button>
+    @click="play" />
+  <loading
+    v-if="process !== '0%'"
+    :process="process" />
 </template>
 
 <script>
@@ -20,7 +21,6 @@ let helper
 let playing = false
 let bgm
 const clock = new THREE.Clock()
-
 const skyScene = new THREE.Object3D()
 
 export default {
@@ -36,6 +36,7 @@ export default {
   data() {
     return {
       isStarted: false,
+      process: '100%',
     }
   },
   beforeCreate() {},
@@ -74,9 +75,6 @@ export default {
       renderer.setPixelRatio(window.devicePixelRatio)
       renderer.setSize(window.innerWidth, window.innerHeight)
       renderer.shadowMap.enabled = true
-      // renderer.outputEncoding = THREE.sRGBEncoding
-      // renderer.toneMapping = THREE.ACESFilmicToneMapping
-      // renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
       this.container = document.getElementById('container')
       this.container.appendChild(renderer.domElement)
@@ -88,15 +86,12 @@ export default {
         0.1,
         20000
       )
-
-      camera.position.set(0, 20, 60)
+      camera.position.set(0, 15, 20)
 
       // 创建场景
       scene = new THREE.Scene()
-
       // 直接给场景添加皮肤
-      // scene.background = new THREE.Color(0xffffff)
-
+      scene.background = new THREE.Color(0xffffff)
       scene.add(skyScene)
 
       // 点光
@@ -122,7 +117,6 @@ export default {
       )
 
       // mmd
-      // const audioParams = { delayTime: (160 * 1) / 30 }
       const loader = new MMDLoader()
 
       helper = new MMDAnimationHelper({
@@ -146,17 +140,6 @@ export default {
             physics: true,
           })
 
-          // 加载运镜
-          loader.loadAnimation(
-            ['./image/vmd/我的悲伤是水做的_镜头_胶龙兽.vmd'],
-            camera,
-            function(cameraAnimation) {
-              helper.add(camera, {
-                animation: cameraAnimation,
-              })
-            }
-          )
-
           const ikHelper = helper.objects.get(mesh).ikSolver.createHelper()
           ikHelper.visible = false
           scene.add(ikHelper)
@@ -164,6 +147,17 @@ export default {
           const physicsHelper = helper.objects.get(mesh).physics.createHelper()
           physicsHelper.visible = false
           scene.add(physicsHelper)
+        }
+      )
+
+      // 加载运镜
+      loader.loadAnimation(
+        ['./image/vmd/我的悲伤是水做的_镜头_胶龙兽.vmd'],
+        camera,
+        function(cameraAnimation) {
+          helper.add(camera, {
+            animation: cameraAnimation,
+          })
         }
       )
 
@@ -187,8 +181,15 @@ export default {
       orbitControls.rotateSpeed = 0.3
       orbitControls.zoomSpeed = 2
       orbitControls.enablePan = true
+      orbitControls.target.set(0, 15, 0)
 
-      // this.animate()
+      THREE.DefaultLoadingManager.onProgress = (
+        url,
+        itemsLoaded,
+        itemsTotal
+      ) => {
+        this.process = 100 - (itemsLoaded / itemsTotal) * 100 + '%'
+      }
 
       window.addEventListener('resize', this.onWindowResize)
     },
@@ -225,17 +226,19 @@ export default {
   position: relative;
 }
 #startButton {
+  width: 50px;
+  height: 50px;
+  background: url(./image/icon_play.png) no-repeat center center / cover;
   position: fixed;
-  bottom: 100px;
-  left: 50%;
-  margin-left: -100px;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 5px;
-  text-align: center;
-  font-size: 20px;
-  color: #fff;
+  bottom: 20px;
+  right: 20px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
   cursor: pointer;
-  border: 1px solid #ccc;
-  padding: 10px 20px;
+  // opacity: 0;
+  transition: 0.3s;
+  &:hover {
+    opacity: 1;
+  }
 }
 </style>
