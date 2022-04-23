@@ -32,31 +32,7 @@ export default {
   deactivated() {},
   beforeUnmount() {},
   unmounted() {},
-  methods: {
-    checkEmail(rule, value, callback) {
-      if (!value) {
-        return callback(new Error('请输入邮箱'))
-      }
-      const reg =
-        /^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$/
-      if (!reg.test(value)) {
-        callback(new Error('请输入正确的邮箱'))
-      } else {
-        callback()
-      }
-    },
-    checkMobile(rule, value, callback) {
-      if (!value) {
-        return callback(new Error('请输入手机号'))
-      }
-      const reg = /^1[3456789]\d{9}$/
-      if (!reg.test(value)) {
-        callback(new Error('请输入正确的手机号'))
-      } else {
-        callback()
-      }
-    },
-  },
+  methods: {},
   computed: {},
   watch: {},
 }
@@ -93,7 +69,7 @@ export default {
       transition: 0.3s;
     }
   }
-  .author{
+  .author {
     font-size: 40px;
     color: rgba(0, 0, 0, 0.5);
     margin-top: 20px;
