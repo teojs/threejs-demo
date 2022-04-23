@@ -5,6 +5,9 @@
         class="process-bar"
         :style="{ width: process }" />
     </div>
+    <div class="author">
+      梦游狮
+    </div>
   </div>
 </template>
 
@@ -72,10 +75,11 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
   .process {
     width: 688px;
     max-width: 80%;
-    height: 100%;
+    height: 300px;
     background: url(/image/loading.png) no-repeat center center / contain;
     position: relative;
     .process-bar {
@@ -88,6 +92,11 @@ export default {
       background: #ffffff;
       transition: 0.3s;
     }
+  }
+  .author{
+    font-size: 40px;
+    color: rgba(0, 0, 0, 0.5);
+    margin-top: 20px;
   }
 }
 </style>
