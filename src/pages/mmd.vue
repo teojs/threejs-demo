@@ -228,7 +228,7 @@ export default {
 #startButton {
   width: 50px;
   height: 50px;
-  background: url(./image/icon_play.png) no-repeat center center / cover;
+  background: url(/image/icon_play.png) no-repeat center center / cover;
   position: fixed;
   bottom: 20px;
   right: 20px;

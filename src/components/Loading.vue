@@ -76,7 +76,7 @@ export default {
     width: 688px;
     max-width: 80%;
     height: 100%;
-    background: url(./image/loading.png) no-repeat center center / contain;
+    background: url(/image/loading.png) no-repeat center center / contain;
     position: relative;
     .process-bar {
       width: 100%;
