@@ -26,9 +26,8 @@ const skyScene = new THREE.Object3D()
 export default {
   routeInfo: {
     meta: {
-      title: 'Pages3d',
+      title: 'MMD',
     },
-    icon: 'el-icon-menu',
     hidden: true,
     sort: 1,
   },
@@ -168,8 +167,8 @@ export default {
       // 镜头控制器
       orbitControls = new OrbitControls(camera, renderer.domElement)
       orbitControls.enableDamping = true
-      orbitControls.dampingFactor = 0.05
-      orbitControls.rotateSpeed = 0.3
+      orbitControls.dampingFactor = 0.2
+      orbitControls.rotateSpeed = 0.6
       orbitControls.zoomSpeed = 2
       orbitControls.enablePan = true
       orbitControls.target.set(0, 15, 0)
