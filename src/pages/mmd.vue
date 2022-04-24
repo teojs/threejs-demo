@@ -224,7 +224,7 @@ export default {
   border-radius: 50%;
   background-color: rgba(0, 0, 0, 0.5);
   cursor: pointer;
-  opacity: 0;
+  // opacity: 0;
   transition: 0.3s;
   &:hover {
     opacity: 1;
