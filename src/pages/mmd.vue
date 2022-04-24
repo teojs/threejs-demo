@@ -45,7 +45,6 @@ export default {
   mounted() {
     this.$nextTick(() => {
       window.Ammo().then(AmmoLib => {
-        window.Ammo = AmmoLib
         this.init()
         this.animate()
       })
@@ -60,6 +59,7 @@ export default {
   methods: {
     play() {
       playing = !playing
+      helper.enable('cameraAnimation', playing)
       helper.enable('animation', playing)
       if (bgm) {
         if (bgm.isPlaying) {
@@ -123,6 +123,7 @@ export default {
         afterglow: 2.0,
       })
       helper.enable('animation', false)
+      helper.enable('cameraAnimation', false)
 
       // 加载角色
       loader.loadWithAnimation(
@@ -130,7 +131,6 @@ export default {
         ['./image/vmd/我的悲伤是水做的.vmd'],
         function(mmd) {
           const mesh = mmd.mesh
-          // mesh.position.set(0, -10, 0)
           mesh.castShadow = true
           mesh.receiveShadow = true
           scene.add(mesh)
@@ -139,14 +139,6 @@ export default {
             animation: mmd.animation,
             physics: true,
           })
-
-          const ikHelper = helper.objects.get(mesh).ikSolver.createHelper()
-          ikHelper.visible = false
-          scene.add(ikHelper)
-
-          const physicsHelper = helper.objects.get(mesh).physics.createHelper()
-          physicsHelper.visible = false
-          scene.add(physicsHelper)
         }
       )
 
@@ -166,7 +158,6 @@ export default {
       new MMDLoader().load(
         './image/stage/简约时尚舞台/Stage.pmx',
         function(mesh) {
-          // mesh.scale.set(0.1, 0.1, 0.1)
           mesh.position.set(0, 0, 50)
           mesh.castShadow = true
           mesh.receiveShadow = true
@@ -202,9 +193,7 @@ export default {
       this.render()
     },
     render() {
-      if (playing) {
-        helper.update(clock.getDelta())
-      }
+      helper.update(clock.getDelta())
       renderer.render(scene, camera)
     },
     animate() {
@@ -235,7 +224,7 @@ export default {
   border-radius: 50%;
   background-color: rgba(0, 0, 0, 0.5);
   cursor: pointer;
-  // opacity: 0;
+  opacity: 0;
   transition: 0.3s;
   &:hover {
     opacity: 1;
