@@ -13,6 +13,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { MMDLoader } from 'three/examples/jsm/loaders/MMDLoader'
 import { MMDAnimationHelper } from 'three/examples/jsm/animation/MMDAnimationHelper.js'
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js'
 let container
 let camera
 let scene
@@ -108,18 +109,6 @@ export default {
       // 均匀光
       scene.add(new THREE.AmbientLight(0xffffff, 0.8))
 
-      // 加载音乐
-      const listener = new THREE.AudioListener()
-      camera.add(listener)
-      bgm = new THREE.Audio(listener)
-      new THREE.AudioLoader().load(
-        './audio/我的悲伤是是水做的.mp3',
-        function(buffer) {
-          bgm.setBuffer(buffer)
-          bgm.setLoop(true)
-        }
-      )
-
       // mmd
       const loader = new MMDLoader()
 
@@ -138,11 +127,24 @@ export default {
           mesh.castShadow = true
           mesh.receiveShadow = true
           scene.add(mesh)
-
           helper.add(mesh, {
             animation: mmd.animation,
             physics: true,
           })
+
+          // 加载音乐
+          const listener = new THREE.AudioListener()
+          camera.add(listener)
+          bgm = new THREE.PositionalAudio(listener)
+          new THREE.AudioLoader().load(
+            './audio/我的悲伤是是水做的.mp3',
+            function(buffer) {
+              bgm.setBuffer(buffer)
+              bgm.setRefDistance(20)
+              bgm.setLoop(true)
+              mesh.add(bgm)
+            }
+          )
         }
       )
 
@@ -159,15 +161,12 @@ export default {
 
       // 加载舞台
 
-      new MMDLoader().load(
-        './stage/简约时尚舞台/Stage.pmx',
-        function(mesh) {
-          mesh.position.set(0, 0, 50)
-          mesh.castShadow = true
-          mesh.receiveShadow = true
-          scene.add(mesh)
-        }
-      )
+      new MMDLoader().load('./stage/简约时尚舞台/Stage.pmx', function(mesh) {
+        mesh.position.set(0, 0, 50)
+        mesh.castShadow = true
+        mesh.receiveShadow = true
+        scene.add(mesh)
+      })
 
       // 镜头控制器
       orbitControls = new OrbitControls(camera, renderer.domElement)
@@ -189,7 +188,15 @@ export default {
         }
       }
 
-      // window.addEventListener('resize', this.onWindowResize)
+      const api = {
+        camera: true,
+      }
+      const gui = new GUI()
+      gui.add(api, 'camera').onChange(function() {
+        helper.enable('cameraAnimation', api.camera)
+      })
+
+      window.addEventListener('resize', this.onWindowResize)
     },
     onWindowResize() {
       camera.aspect = window.innerWidth / window.innerHeight
