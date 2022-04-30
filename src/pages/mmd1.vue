@@ -13,6 +13,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { MMDLoader } from 'three/examples/jsm/loaders/MMDLoader'
 import { MMDAnimationHelper } from 'three/examples/jsm/animation/MMDAnimationHelper.js'
+let container
 let camera
 let scene
 let renderer
@@ -55,6 +56,10 @@ export default {
   unmounted() {},
   methods: {
     play() {
+      if (!this.hasInit) {
+        this.animate()
+      }
+
       playing = !playing
       helper.enable('cameraAnimation', playing)
       helper.enable('animation', playing)
@@ -68,13 +73,16 @@ export default {
     },
     init() {
       // 创建渲染器，添加抗锯齿
-      renderer = new THREE.WebGLRenderer({ antialias: true })
+      renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        logarithmicDepthBuffer: true,
+      })
       renderer.setPixelRatio(window.devicePixelRatio)
       renderer.setSize(window.innerWidth, window.innerHeight)
       renderer.shadowMap.enabled = true
 
-      this.container = document.getElementById('container')
-      this.container.appendChild(renderer.domElement)
+      container = document.getElementById('container')
+      container.appendChild(renderer.domElement)
 
       // 透视
       camera = new THREE.PerspectiveCamera(
@@ -181,7 +189,7 @@ export default {
         }
       }
 
-      window.addEventListener('resize', this.onWindowResize)
+      // window.addEventListener('resize', this.onWindowResize)
     },
     onWindowResize() {
       camera.aspect = window.innerWidth / window.innerHeight
@@ -196,6 +204,8 @@ export default {
       renderer.render(scene, camera)
     },
     animate() {
+      this.hasInit = true
+
       requestAnimationFrame(this.animate)
 
       orbitControls.update()
