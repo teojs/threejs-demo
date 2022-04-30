@@ -1,192 +1,120 @@
 <template>
-  <div id="container" />
-  <div class="options">
-    <label for="">
-      <div>lookAt</div>
-      <input
-        v-model="lookAt.x"
-        min="-5000"
-        max="5000"
-        type="range">
-      <input
-        v-model="lookAt.y"
-        min="-5000"
-        max="5000"
-        type="range">
-      <input
-        v-model="lookAt.z"
-        min="-5000"
-        max="5000"
-        type="range">
-    </label>
-    <label for="">
-      <div>cameraPos</div>
-      <input
-        v-model="cameraPos.x"
-        min="-5000"
-        max="5000"
-        type="range">
-      <input
-        v-model="cameraPos.y"
-        min="-5000"
-        max="5000"
-        type="range">
-      <input
-        v-model="cameraPos.z"
-        min="-1000"
-        max="1000"
-        type="range">
-    </label>
+  <div class="list">
+    <router-link
+      v-for="(item, index) in list"
+      :key="index"
+      :to="item.locLink"
+      class="list-item">
+      <img
+        :src="item.img"
+        :alt="item.title">
+      <div class="title">
+        {{ item.title }}
+      </div>
+    </router-link>
+    <div
+      v-for="(item, index) in 3"
+      :key="'blank' + index"
+      class="list-item blank" />
   </div>
 </template>
 
 <script>
-import * as THREE from 'three'
 export default {
   name: 'Home',
   routeInfo: {
     meta: {
       title: '首页',
     },
-    sort: 1,
   },
   data() {
     return {
-      mouseX: 0,
-      mouseY: 0,
-      mouseZ: 3,
-      windowHalfX: window.innerWidth / 2,
-      windowHalfY: window.innerHeight / 2,
-
-      lookAt: {
-        x: 0,
-        y: 0,
-        z: -600,
-      },
-      cameraPos: {
-        x: 0,
-        y: 0,
-        z: 0,
-      },
+      list: [
+        {
+          title: '我的网页是MMD做的',
+          img: '/image/我的网页是MMD做的.png',
+          locLink: '/mmd1',
+          bLink: '',
+        },
+        {
+          title: '我的网页是MMD做的',
+          img: '/image/我的网页是MMD做的.png',
+          locLink: '/mmd1',
+          bLink: '',
+        },
+        {
+          title: '我的网页是MMD做的',
+          img: '/image/我的网页是MMD做的.png',
+          locLink: '/mmd1',
+          bLink: '',
+        },
+        {
+          title: '我的网页是MMD做的',
+          img: '/image/我的网页是MMD做的.png',
+          locLink: '/mmd1',
+          bLink: '',
+        },
+      ],
     }
   },
-  mounted() {
-    this.$nextTick(() => {
-      this.init()
-    })
-  },
-  methods: {
-    init() {
-      this.container = document.getElementById('container')
-      window.addEventListener('resize', this.onWindowResize, false)
-      document.addEventListener('mousemove', this.onMouseMove, false)
-      document.addEventListener('wheel', this.onMouseWheel, false)
-
-      // 创建渲染器，添加抗锯齿
-      this.renderer = new THREE.WebGLRenderer({ antialias: true })
-
-      // 设置像素比
-      this.renderer.setPixelRatio(window.devicePixelRatio)
-      this.renderer.setSize(window.innerWidth, window.innerHeight)
-      this.renderer.shadowMap.enabled = true
-
-      this.container.appendChild(this.renderer.domElement)
-
-      // 创建场景
-      this.scene = new THREE.Scene()
-
-      // 全景场景
-      const geometry = new THREE.SphereGeometry(600, 60, 60)
-      // 按z轴翻转
-      geometry.scale(1, 1, -1)
-      // 添加贴图：全景图
-      const skyTexture = new THREE.MeshBasicMaterial({
-        map: new THREE.TextureLoader().load('./image/skyTexture_2.jpg'),
-      })
-
-      // 渲染贴图
-      this.mesh = new THREE.Mesh(geometry, skyTexture)
-
-      this.scene.add(this.mesh)
-
-      // 渲染一个盒子作参照物
-      const box = new THREE.BoxGeometry()
-      const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-      const cube = new THREE.Mesh(box, boxMaterial)
-      cube.position.z = -100
-
-      this.scene.add(cube)
-
-      // 摄像机
-      this.camera = new THREE.PerspectiveCamera(
-        60, // 视野大小
-        window.innerWidth / window.innerHeight, // 视野比例
-        1,
-        2000
-      )
-      // 设置摄像机位置
-      this.camera.position.set(
-        this.cameraPos.x,
-        this.cameraPos.y,
-        this.cameraPos.z
-      )
-      // this.camera.target = new THREE.Vector3(0, 0, 0)
-      // this.camera.position.z = 0
-      // this.camera.focalLength = 3
-
-      const animate = () => {
-        requestAnimationFrame(animate)
-        this.render()
-      }
-      animate()
-    },
-
-    render() {
-      // this.camera.position.x += (this.mouseX - this.camera.position.x) * 0.1
-      // this.camera.position.y += (-this.mouseY - this.camera.position.y) * 0.1
-      // this.camera.position.z += (this.mouseZ - this.camera.position.z) * 0.1
-      this.lookAt.x += (-this.mouseX - this.lookAt.x) * 0.1
-      this.lookAt.y += (this.mouseY - this.lookAt.y) * 0.1
-      // this.cameraPos.z += (this.mouseZ - this.cameraPos.z) * 0.1
-      // this.camera.lookAt(this.scene.position)
-      this.camera.lookAt(this.lookAt.x, this.lookAt.y, this.lookAt.z)
-      this.camera.position.set(
-        this.cameraPos.x,
-        this.cameraPos.y,
-        this.cameraPos.z
-      )
-      this.renderer.render(this.scene, this.camera)
-    },
-
-    onMouseMove(event) {
-      this.mouseX = event.clientX - this.windowHalfX
-      this.mouseY = event.clientY - this.windowHalfY
-    },
-
-    onMouseWheel(event) {
-      this.camera.fov += event.deltaY * 0.05
-      this.camera.updateProjectionMatrix()
-    },
-
-    // 窗口改变重新渲染
-    onWindowResize() {
-      this.windowHalfX = window.innerWidth / 2
-      this.windowHalfY = window.innerHeight / 2
-      this.camera.aspect = window.innerWidth / window.innerHeight
-      this.camera.updateProjectionMatrix()
-      this.renderer.setSize(window.innerWidth, window.innerHeight)
-    },
-  },
+  mounted() {},
+  methods: {},
 }
 </script>
 <style lang="less" scoped>
-.options {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  padding: 10px;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 4px;
-  color: #ffffff;
+.list {
+  max-width: 1500px;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  .list-item {
+    width: 22%;
+    margin: 30px 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow: 0 20px 20px 2px #e5e5e5;
+    overflow: hidden;
+    &.blank {
+      box-shadow: none;
+    }
+    // &:hover {
+    //   img {
+    //     transform: scale(1.1);
+    //   }
+    // }
+    img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .title {
+      padding: 10px;
+    }
+  }
+}
+@media screen and (max-width: 1200px) {
+  .list {
+    .list-item {
+      width: 30%;
+    }
+  }
+}
+@media screen and (max-width: 900px) {
+  .list {
+    .list-item {
+      width: 47%;
+    }
+  }
+}
+@media screen and (max-width: 670px) {
+  .list {
+    width: 100%;
+    flex-direction: column;
+    .list-item {
+      width: 100%;
+      margin: 30px 0;
+    }
+  }
 }
 </style>
