@@ -65,7 +65,7 @@ export default {
       right: 0;
       bottom: 0;
       position: absolute;
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.8);
       transition: 0.3s;
     }
   }

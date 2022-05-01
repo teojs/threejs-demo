@@ -57,10 +57,6 @@ export default {
   unmounted() {},
   methods: {
     play() {
-      if (!this.hasInit) {
-        this.animate()
-      }
-
       playing = !playing
       helper.enable('cameraAnimation', playing)
       helper.enable('animation', playing)
