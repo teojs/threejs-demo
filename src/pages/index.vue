@@ -1,9 +1,8 @@
 <template>
   <div class="list">
-    <router-link
+    <div
       v-for="(item, index) in list"
       :key="index"
-      :to="item.locLink"
       class="list-item">
       <img
         :src="item.img"
@@ -11,7 +10,18 @@
       <div class="title">
         {{ item.title }}
       </div>
-    </router-link>
+      <div class="buttons">
+        <router-link
+          :to="item.locLink"
+          class="button">
+          在线看
+        </router-link>
+        <a
+          class="button"
+          :href="item.bLink"
+          target="_blank"> B站看 </a>
+      </div>
+    </div>
     <div
       v-for="(item, index) in 3"
       :key="'blank' + index"
@@ -34,25 +44,13 @@ export default {
           title: '我的网页是MMD做的',
           img: '/image/我的网页是MMD做的.png',
           locLink: '/mmd1',
-          bLink: '',
+          bLink: 'https://www.bilibili.com/video/BV1Yr4y1J7Kj/',
         },
         {
-          title: '我的网页是MMD做的',
+          title: '还是你的笑容最可爱',
           img: '/image/我的网页是MMD做的.png',
-          locLink: '/mmd1',
-          bLink: '',
-        },
-        {
-          title: '我的网页是MMD做的',
-          img: '/image/我的网页是MMD做的.png',
-          locLink: '/mmd1',
-          bLink: '',
-        },
-        {
-          title: '我的网页是MMD做的',
-          img: '/image/我的网页是MMD做的.png',
-          locLink: '/mmd1',
-          bLink: '',
+          locLink: '/mmd2',
+          bLink: 'https://www.bilibili.com/video/BV1Nu411r7vs/',
         },
       ],
     }
@@ -78,11 +76,6 @@ export default {
     &.blank {
       box-shadow: none;
     }
-    // &:hover {
-    //   img {
-    //     transform: scale(1.1);
-    //   }
-    // }
     img {
       width: 100%;
       height: 200px;
@@ -90,6 +83,23 @@ export default {
     }
     .title {
       padding: 10px;
+    }
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #ededed;
+      .button {
+        padding: 10px 0;
+        text-align: center;
+        font-size: 16px;
+        flex: 1;
+        &:first-child {
+          border-right: 1px solid #ededed;
+        }
+        &:hover {
+          background: #ededed;
+        }
+      }
     }
   }
 }

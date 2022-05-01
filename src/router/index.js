@@ -25,7 +25,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const title = to.meta.title ? to.meta.title + ' - 项目名称' : '项目名称'
+  const title = to.meta.title ? to.meta.title + ' - MMD' : 'MMD'
   document.title = title
   next()
 })

@@ -28,7 +28,7 @@ const clock = new THREE.Clock()
 export default {
   routeInfo: {
     meta: {
-      title: 'MMD',
+      title: '还是你的笑容最可爱',
     },
     hidden: true,
     sort: 1,
@@ -200,7 +200,7 @@ export default {
         const mesh = mmd.mesh
         mesh.castShadow = true
         // mesh.receiveShadow = true
-        mesh.position.set(0, 0, 30)
+        mesh.position.set(0, 0, 25)
         scene.add(mesh)
         helper.add(mesh, {
           animation: mmd.animation,
