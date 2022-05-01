@@ -48,7 +48,7 @@ export default {
         },
         {
           title: '还是你的笑容最可爱',
-          img: '/image/我的网页是MMD做的.png',
+          img: '/image/还是你的笑容最可爱.png',
           locLink: '/mmd2',
           bLink: 'https://www.bilibili.com/video/BV1Nu411r7vs/',
         },
