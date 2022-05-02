@@ -52,6 +52,12 @@ export default {
           locLink: '/mmd2',
           bLink: 'https://www.bilibili.com/video/BV1Nu411r7vs/',
         },
+        {
+          title: '危险派对',
+          img: '/image/危险派对.png',
+          locLink: '/mmd3',
+          bLink: 'https://www.bilibili.com/video/BV1Nu411r7vs/',
+        },
       ],
     }
   },

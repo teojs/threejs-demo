@@ -99,6 +99,15 @@ export default {
       const pointLight = new THREE.PointLight(0xffffff, 1, 150)
       pointLight.position.set(50, 100, -40)
       pointLight.castShadow = true
+      pointLight.shadow.mapSize.width = 2048
+      pointLight.shadow.mapSize.height = 2048
+      const d = 50
+      pointLight.shadow.camera.left = -d
+      pointLight.shadow.camera.right = d
+      pointLight.shadow.camera.top = d
+      pointLight.shadow.camera.bottom = -d
+      pointLight.shadow.camera.far = 110
+      pointLight.shadow.bias = -0.0001
       scene.add(pointLight)
       scene.add(new THREE.PointLightHelper(pointLight, 1))
 
